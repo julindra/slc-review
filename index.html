@@ -72,6 +72,8 @@
         }
       }).catch(err => {
         alert('getVideo error');
+        localStorage.clear();
+        window.location = window.location.href.split("?")[0];
       });
     }
 
@@ -90,6 +92,7 @@
         getVideo(data.access_token);
       }).catch(err => {
         alert('login error');
+        show('loginDiv');
       });
     } else {
       show('loginDiv');
