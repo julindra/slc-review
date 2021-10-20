@@ -5,8 +5,95 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>slc-review</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/papercss@1.8.2/dist/paper.min.css">
 </head>
 <body>
-  <h1>slc-review</h1>
+  <div class="paper container text-center">
+    <h1>slc-review</h1>
+
+    <div id="user">
+      <p>Pull request <a href="https://github.com/rmt-18-rome-fox/p0-simulasi-livecode-3" target="_blank">p0-simulasi-livecode-3</a> dulu bos!<br><br>Refresh halaman ini kalo udh ya!</p>
+      <iframe src="" width="100%" height="600" allow="autoplay"></iframe>
+    </div>
+
+    <div id="login">
+      <a href="https://github.com/login/oauth/authorize?client_id=92d79fe5543adc767010&scope=user:read%20repo">
+        <button>Login With Github</button>
+      </a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script>
+    function getParameterByName(name, url = window.location.href) {
+      name = name.replace(/[\[\]]/g, '\\$&');
+      var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+        results = regex.exec(url);
+      if (!results) return null;
+      if (!results[2]) return '';
+      return decodeURIComponent(results[2].replace(/\+/g, ' '));
+    }
+
+    const base = 'https://cubinx.com/slc-review-api/';
+    const code = getParameterByName('code');
+
+    const div = {
+      userDiv: document.querySelector('#user'),
+      loginDiv: document.querySelector('#login')
+    };
+
+    const access_token = localStorage.getItem('access_token');
+
+    function show(name) {
+      for(let key in div) {
+        div[key].style.display = 'none';
+      }
+      if(name) {
+        div[name].style.display = 'block';
+      }
+    }
+
+    function getVideo(access_token) {
+      axios({
+        method: 'POST',
+        url: base+'video',
+        headers: {
+          access_token
+        }
+      }).then(({ data }) => {
+        show('userDiv');
+
+        if(data.error) {
+          div.userDiv.querySelector('iframe').style.display = 'none';
+        } else {
+          div.userDiv.querySelector('p').style.display = 'none';
+          div.userDiv.querySelector('iframe').setAttribute('src', data.video);
+        }
+      }).catch(err => {
+        alert('getVideo error');
+      });
+    }
+
+    show();
+    if(access_token) {
+      getVideo(access_token);
+    } else if(code) {
+      axios({
+        method: 'POST',
+        url: base+'login',
+        data: {
+          code
+        }
+      }).then(({ data }) => {
+        localStorage.setItem('access_token', data.access_token);
+        getVideo(data.access_token);
+      }).catch(err => {
+        alert('login error');
+      });
+    } else {
+      show('loginDiv');
+    }
+  </script>
 </body>
 </html>
